@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiniela Mundial 2026</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #1a472a 0%, #0d2818 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: auto; }
+        h1 {
+            color: #ffd700;
+            text-align: center;
+            font-size: 2.5rem;
+            text-shadow: 3px 3px 0 #1a472a;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .subtitulo { text-align: center; color: white; margin-bottom: 30px; }
+        
+        .admin-panel {
+            background: #2c3e50;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            display: none;
+        }
+        .admin-panel.visible { display: block; }
+        .admin-header {
+            background: #e74c3c;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .admin-content {
+            padding: 20px;
+            background: white;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .admin-partido {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .admin-partido select { padding: 5px 10px; }
+        .btn-admin {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .btn-admin:hover { background: #c0392b; }
+        
+        .selector-familiar {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .selector-familiar label { font-weight: bold; font-size: 1.1rem; }
+        select, button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            font-weight: bold;
+        }
+        button:hover { background-color: #27ae60; }
+        .btn-admin-toggle {
+            background-color: #e67e22;
+        }
+        .btn-admin-toggle:hover { background-color: #d35400; }
+        
+        .dia-bloque {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .dia-header {
+            background: linear-gradient(135deg, #2c3e50, #1a472a);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .dia-header h3 { margin: 0; font-size: 1.3rem; }
+        .partidos-count {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .partidos-dia { padding: 15px; }
+        .partido-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+        .partido-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: #fafafa;
+        }
+        .partido-info {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        .grupo-tag {
+            background: #3498db;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        .resultado-real {
+            background: #27ae60;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        .hora, .estadio { display: inline-flex; align-items: center; gap: 4px; }
+        .equipos {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+        .equipo { flex: 1; }
+        .equipo:first-child { text-align: right; }
+        .vs { margin: 0 15px; color: #e74c3c; }
+        .prediccion {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            border-top: 1px dashed #eee;
+            padding-top: 10px;
+        }
+        .prediccion select { flex: 2; min-width: 150px; }
+        .puntos-info { font-size: 0.75rem; color: #27ae60; font-weight: bold; }
+        
+        .tabla-general {
+            background: white;
+            border-radius: 12px;
+            margin-top: 30px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        .tabla-general h2 { margin-top: 0; color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: center; border-bottom: 1px solid #ddd; }
+        th { background: #2c3e50; color: white; }
+        .puntos-actuales { font-weight: bold; color: #27ae60; font-size: 1.2rem; }
+        
+        footer { text-align: center; color: white; margin-top: 30px; padding: 15px; font-size: 0.8rem; }
+        
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .equipos { flex-direction: column; gap: 8px; }
+            .equipo:first-child { text-align: center; }
+            .partido-info { flex-direction: column; gap: 5px; }
+        }
+
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button:hover {
+            background: #1a472a !important;
+        }
+        .tab-contenido {
+            padding: 20px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="titulo-principal">🏆 QUINIELA MUNDIAL 2026 🏆</h1>
+        <div class="subtitulo">Canadá • México • Estados Unidos | 11 de junio - 27 de junio (Fase de Grupos)</div>
+
+        <div id="admin-panel" class="admin-panel">
+            <div class="admin-header">
+                <span>🔧 PANEL DE ADMINISTRACIÓN - Ingresar resultados reales</span>
+                <button id="btn-cerrar-admin" class="btn-admin">✖ Cerrar</button>
+            </div>
+            <div id="admin-content" class="admin-content"></div>
+        </div>
+
+        <div class="selector-familiar">
+            <label>👤 Soy:</label>
+            <select id="selector-familiar">
+                <option value="Luis">Luis</option>
+                <option value="Fernanda">Fernanda</option>
+                <option value="Gustavo">Gustavo</option>
+                <option value="Maru">Maru</option>
+                <option value="Isaac">Isaac</option>
+                <option value="Lorena">Lorena</option>
+                <option value="Jesús">Jesús</option>
+                <option value="Francisco">Francisco</option>
+                <option value="Francisco">Sol</option>
+            </select>
+            <button id="btn-cargar">📋 Cargar mis predicciones</button>
+            <button id="btn-guardar">💾 Guardar mis predicciones</button>
+            <button id="btn-mostrar-admin" class="btn-admin-toggle">🔧 Admin (resultados)</button>
+        </div>
+
+        <div id="contenedor-partidos"></div>
+
+        <!-- Sistema de pestañas para tablas -->
+        <div style="background: white; border-radius: 12px; margin-top: 30px; overflow: hidden;">
+            <div style="display: flex; flex-wrap: wrap; background: #2c3e50; gap: 2px;">
+                <button id="tab-general" class="tab-button active" style="background: #1a472a; color: white; border: none; padding: 12px 20px; cursor: pointer; font-weight: bold;">🏅 Tabla General</button>
+                <button id="tab-posiciones" class="tab-button" style="background: #34495e; color: white; border: none; padding: 12px 20px; cursor: pointer; font-weight: bold;">📊 Posiciones Reales</button>
+                <button id="tab-fase-grupos" class="tab-button" style="background: #34495e; color: white; border: none; padding: 12px 20px; cursor: pointer; font-weight: bold;">🏆 Fase de Grupos</button>
+                <button id="tab-16avos" class="tab-button" style="background: #34495e; color: white; border: none; padding: 12px 20px; cursor: pointer; font-weight: bold;">⚽ 16avos de Final</button>
+                <button id="tab-octavos" class="tab-button" style="background: #34495e; color: white; border: none; padding: 12px 20px; cursor: pointer; font-weight: bold;">⚽ Octavos de Final</button>
+                <button id="tab-cuartos" class="tab-button" style="background: #34495e; color: white; border: none; padding: 12px 20px; cursor: pointer; font-weight: bold;">⚽ Cuartos de Final</button>
+                <button id="tab-semis" class="tab-button" style="background: #34495e; color: white; border: none; padding: 12px 20px; cursor: pointer; font-weight: bold;">⚽ Semifinales</button>
+                <button id="tab-final" class="tab-button" style="background: #34495e; color: white; border: none; padding: 12px 20px; cursor: pointer; font-weight: bold;">🏆 Final y 3er Puesto</button>
+            </div>
+            
+            <!-- Contenido de las pestañas -->
+            <div id="contenido-tab-general" class="tab-contenido" style="display: block; padding: 20px;">
+                <h2>🏅 Tabla General</h2>
+                <div id="tabla-general-contenido"><p>Cargando tabla...</p></div>
+            </div>
+            
+            <div id="contenido-tab-posiciones" class="tab-contenido" style="display: none; padding: 20px;">
+                <h2>📊 Tabla de Posiciones Reales por Grupo</h2>
+                <div id="tabla-posiciones"></div>
+            </div>
+            
+            <div id="contenido-tab-fase-grupos" class="tab-contenido" style="display: none; padding: 20px;">
+                <h2>🏆 Puntuación por Familiar - Fase de Grupos</h2>
+                <div id="tabla-puntos-grupos"><p>Cargando...</p></div>
+            </div>
+            
+            <div id="contenido-tab-16avos" class="tab-contenido" style="display: none; padding: 20px;">
+                <h2>⚽ Puntuación por Familiar - 16avos de Final</h2>
+                <div id="tabla-puntos-16avos"><p>⚙️ Partidos de 16avos aún no disponibles. Se habilitarán cuando comience la fase eliminatoria.</p></div>
+            </div>
+            
+            <div id="contenido-tab-octavos" class="tab-contenido" style="display: none; padding: 20px;">
+                <h2>⚽ Puntuación por Familiar - Octavos de Final</h2>
+                <div id="tabla-puntos-octavos"><p>⚙️ Partidos de Octavos aún no disponibles. Se habilitarán cuando comience la fase eliminatoria.</p></div>
+            </div>
+            
+            <div id="contenido-tab-cuartos" class="tab-contenido" style="display: none; padding: 20px;">
+                <h2>⚽ Puntuación por Familiar - Cuartos de Final</h2>
+                <div id="tabla-puntos-cuartos"><p>⚙️ Partidos de Cuartos aún no disponibles. Se habilitarán cuando comience la fase eliminatoria.</p></div>
+            </div>
+            
+            <div id="contenido-tab-semis" class="tab-contenido" style="display: none; padding: 20px;">
+                <h2>⚽ Puntuación por Familiar - Semifinales</h2>
+                <div id="tabla-puntos-semis"><p>⚙️ Partidos de Semifinales aún no disponibles. Se habilitarán cuando comience la fase eliminatoria.</p></div>
+            </div>
+            
+            <div id="contenido-tab-final" class="tab-contenido" style="display: none; padding: 20px;">
+                <h2>🏆 Puntuación por Familiar - Final y 3er Puesto</h2>
+                <div id="tabla-puntos-final"><p>⚙️ Partidos de Final aún no disponibles. Se habilitarán cuando comience la fase eliminatoria.</p></div>
+            </div>
+        </div>
+
+        <!-- Sección de estadísticas por familiar (siempre visible) -->
+        <div class="tabla-general" style="margin-top: 20px;">
+            <h2>📈 Estadísticas y Logros por Familiar</h2>
+            <div id="estadisticas-familiares"></div>
+        </div>
+
+        <footer>
+            💡 Selecciona tu nombre, elige tus ganadores y guarda. Cada acierto en fase de grupos vale 1 punto.<br>
+            🔧 El administrador puede ingresar resultados reales (doble clic en el título o botón Admin)<br>
+            ⏰ Horarios en tiempo de CDMX (2 horas menos que ET)
+        </footer>
+    </div>
+
+    <script>
+        // ========================
+        // PARTIDOS COMPLETOS - FASE DE GRUPOS (11 AL 27 DE JUNIO)
+        // Basado en calendario oficial FIFA
+        // Horarios ET convertidos a CDMX (-2 horas)
+        // ========================
+        const partidosCalendario = [
+            // === JUEVES 11 DE JUNIO ===
+            { id: "1", grupo: "A", equipo1: "México", equipo2: "Sudáfrica", fecha: "2026-06-11", horaET: "15:00", estadio: "Estadio Ciudad de México" },
+            { id: "2", grupo: "A", equipo1: "Corea del Sur", equipo2: "República Checa", fecha: "2026-06-11", horaET: "22:00", estadio: "Estadio Guadalajara" },
+            
+            // === VIERNES 12 DE JUNIO ===
+            { id: "3", grupo: "B", equipo1: "Canadá", equipo2: "Bosnia y Herzegovina", fecha: "2026-06-12", horaET: "15:00", estadio: "Estadio Toronto" },
+            { id: "4", grupo: "D", equipo1: "EE.UU.", equipo2: "Paraguay", fecha: "2026-06-12", horaET: "21:00", estadio: "Estadio Los Ángeles" },
+            
+            // === SÁBADO 13 DE JUNIO ===
+            { id: "5", grupo: "B", equipo1: "Catar", equipo2: "Suiza", fecha: "2026-06-13", horaET: "15:00", estadio: "Estadio Bahía de San Francisco" },
+            { id: "6", grupo: "C", equipo1: "Brasil", equipo2: "Marruecos", fecha: "2026-06-13", horaET: "18:00", estadio: "Estadio Nueva York Nueva Jersey" },
+            { id: "7", grupo: "C", equipo1: "Haití", equipo2: "Escocia", fecha: "2026-06-13", horaET: "21:00", estadio: "Estadio Boston" },
+            { id: "8", grupo: "D", equipo1: "Australia", equipo2: "Turquía", fecha: "2026-06-13", horaET: "00:00", estadio: "Estadio BC Place Vancouver" },
+            
+            // === DOMINGO 14 DE JUNIO ===
+            { id: "9", grupo: "E", equipo1: "Alemania", equipo2: "Curazao", fecha: "2026-06-14", horaET: "13:00", estadio: "Estadio Houston" },
+            { id: "10", grupo: "F", equipo1: "Países Bajos", equipo2: "Japón", fecha: "2026-06-14", horaET: "16:00", estadio: "Estadio Dallas" },
+            { id: "11", grupo: "E", equipo1: "Costa de Marfil", equipo2: "Ecuador", fecha: "2026-06-14", horaET: "19:00", estadio: "Estadio Filadelfia" },
+            { id: "12", grupo: "F", equipo1: "Suecia", equipo2: "Túnez", fecha: "2026-06-14", horaET: "22:00", estadio: "Estadio Monterrey" },
+            
+            // === LUNES 15 DE JUNIO ===
+            { id: "13", grupo: "H", equipo1: "España", equipo2: "Cabo Verde", fecha: "2026-06-15", horaET: "12:00", estadio: "Estadio Atlanta" },
+            { id: "14", grupo: "G", equipo1: "Bélgica", equipo2: "Egipto", fecha: "2026-06-15", horaET: "15:00", estadio: "Estadio Seattle" },
+            { id: "15", grupo: "H", equipo1: "Arabia Saudita", equipo2: "Uruguay", fecha: "2026-06-15", horaET: "18:00", estadio: "Estadio Miami" },
+            { id: "16", grupo: "G", equipo1: "Irán", equipo2: "Nueva Zelanda", fecha: "2026-06-15", horaET: "21:00", estadio: "Estadio Los Ángeles" },
+            
+            // === MARTES 16 DE JUNIO ===
+            { id: "17", grupo: "I", equipo1: "Francia", equipo2: "Senegal", fecha: "2026-06-16", horaET: "15:00", estadio: "Estadio Nueva York Nueva Jersey" },
+            { id: "18", grupo: "I", equipo1: "Irak", equipo2: "Noruega", fecha: "2026-06-16", horaET: "18:00", estadio: "Estadio Boston" },
+            { id: "19", grupo: "J", equipo1: "Argentina", equipo2: "Argelia", fecha: "2026-06-16", horaET: "21:00", estadio: "Estadio Kansas City" },
+            { id: "20", grupo: "J", equipo1: "Austria", equipo2: "Jordania", fecha: "2026-06-16", horaET: "00:00", estadio: "Estadio Bahía de San Francisco" },
+            
+            // === MIÉRCOLES 17 DE JUNIO ===
+            { id: "21", grupo: "K", equipo1: "Portugal", equipo2: "RD Congo", fecha: "2026-06-17", horaET: "13:00", estadio: "Estadio Houston" },
+            { id: "22", grupo: "L", equipo1: "Inglaterra", equipo2: "Croacia", fecha: "2026-06-17", horaET: "16:00", estadio: "Estadio Dallas" },
+            { id: "23", grupo: "L", equipo1: "Ghana", equipo2: "Panamá", fecha: "2026-06-17", horaET: "19:00", estadio: "Estadio Toronto" },
+            { id: "24", grupo: "K", equipo1: "Uzbekistán", equipo2: "Colombia", fecha: "2026-06-17", horaET: "22:00", estadio: "Estadio Ciudad de México" },
+            
+            // === JUEVES 18 DE JUNIO ===
+            { id: "25", grupo: "A", equipo1: "República Checa", equipo2: "Sudáfrica", fecha: "2026-06-18", horaET: "12:00", estadio: "Estadio Atlanta" },
+            { id: "26", grupo: "B", equipo1: "Suiza", equipo2: "Bosnia y Herzegovina", fecha: "2026-06-18", horaET: "15:00", estadio: "Estadio Los Ángeles" },
+            { id: "27", grupo: "B", equipo1: "Canadá", equipo2: "Catar", fecha: "2026-06-18", horaET: "18:00", estadio: "Estadio BC Place Vancouver" },
+            { id: "28", grupo: "A", equipo1: "México", equipo2: "Corea del Sur", fecha: "2026-06-18", horaET: "21:00", estadio: "Estadio Guadalajara" },
+            
+            // === VIERNES 19 DE JUNIO ===
+            { id: "29", grupo: "D", equipo1: "EE.UU.", equipo2: "Australia", fecha: "2026-06-19", horaET: "15:00", estadio: "Estadio Seattle" },
+            { id: "30", grupo: "C", equipo1: "Escocia", equipo2: "Marruecos", fecha: "2026-06-19", horaET: "18:00", estadio: "Estadio Boston" },
+            { id: "31", grupo: "C", equipo1: "Brasil", equipo2: "Haití", fecha: "2026-06-19", horaET: "21:00", estadio: "Estadio Filadelfia" },
+            { id: "32", grupo: "D", equipo1: "Turquía", equipo2: "Paraguay", fecha: "2026-06-19", horaET: "00:00", estadio: "Estadio Bahía de San Francisco" },
+            
+            // === SÁBADO 20 DE JUNIO ===
+            { id: "33", grupo: "F", equipo1: "Países Bajos", equipo2: "Suecia", fecha: "2026-06-20", horaET: "13:00", estadio: "Estadio Houston" },
+            { id: "34", grupo: "E", equipo1: "Alemania", equipo2: "Costa de Marfil", fecha: "2026-06-20", horaET: "16:00", estadio: "Estadio Toronto" },
+            { id: "35", grupo: "E", equipo1: "Ecuador", equipo2: "Curazao", fecha: "2026-06-20", horaET: "22:00", estadio: "Estadio Kansas City" },
+            { id: "36", grupo: "F", equipo1: "Túnez", equipo2: "Japón", fecha: "2026-06-20", horaET: "00:00", estadio: "Estadio Monterrey" },
+            
+            // === DOMINGO 21 DE JUNIO ===
+            { id: "37", grupo: "H", equipo1: "España", equipo2: "Arabia Saudita", fecha: "2026-06-21", horaET: "12:00", estadio: "Estadio Atlanta" },
+            { id: "38", grupo: "G", equipo1: "Bélgica", equipo2: "Irán", fecha: "2026-06-21", horaET: "15:00", estadio: "Estadio Los Ángeles" },
+            { id: "39", grupo: "H", equipo1: "Uruguay", equipo2: "Cabo Verde", fecha: "2026-06-21", horaET: "18:00", estadio: "Estadio Miami" },
+            { id: "40", grupo: "G", equipo1: "Nueva Zelanda", equipo2: "Egipto", fecha: "2026-06-21", horaET: "21:00", estadio: "Estadio BC Place Vancouver" },
+            
+            // === LUNES 22 DE JUNIO ===
+            { id: "41", grupo: "J", equipo1: "Argentina", equipo2: "Austria", fecha: "2026-06-22", horaET: "13:00", estadio: "Estadio Dallas" },
+            { id: "42", grupo: "I", equipo1: "Francia", equipo2: "Irak", fecha: "2026-06-22", horaET: "17:00", estadio: "Estadio Filadelfia" },
+            { id: "43", grupo: "I", equipo1: "Noruega", equipo2: "Senegal", fecha: "2026-06-22", horaET: "20:00", estadio: "Estadio Nueva York Nueva Jersey" },
+            { id: "44", grupo: "J", equipo1: "Jordania", equipo2: "Argelia", fecha: "2026-06-22", horaET: "23:00", estadio: "Estadio Bahía de San Francisco" },
+            
+            // === MARTES 23 DE JUNIO ===
+            { id: "45", grupo: "K", equipo1: "Portugal", equipo2: "Uzbekistán", fecha: "2026-06-23", horaET: "13:00", estadio: "Estadio Houston" },
+            { id: "46", grupo: "L", equipo1: "Inglaterra", equipo2: "Ghana", fecha: "2026-06-23", horaET: "16:00", estadio: "Estadio Boston" },
+            { id: "47", grupo: "L", equipo1: "Panamá", equipo2: "Croacia", fecha: "2026-06-23", horaET: "19:00", estadio: "Estadio Toronto" },
+            { id: "48", grupo: "K", equipo1: "Colombia", equipo2: "RD Congo", fecha: "2026-06-23", horaET: "22:00", estadio: "Estadio Guadalajara" },
+            
+            // === MIÉRCOLES 24 DE JUNIO ===
+            { id: "49", grupo: "B", equipo1: "Suiza", equipo2: "Canadá", fecha: "2026-06-24", horaET: "15:00", estadio: "Estadio BC Place Vancouver" },
+            { id: "50", grupo: "B", equipo1: "Bosnia y Herzegovina", equipo2: "Catar", fecha: "2026-06-24", horaET: "15:00", estadio: "Estadio Seattle" },
+            { id: "51", grupo: "C", equipo1: "Escocia", equipo2: "Brasil", fecha: "2026-06-24", horaET: "18:00", estadio: "Estadio Miami" },
+            { id: "52", grupo: "C", equipo1: "Marruecos", equipo2: "Haití", fecha: "2026-06-24", horaET: "18:00", estadio: "Estadio Atlanta" },
+            { id: "53", grupo: "A", equipo1: "República Checa", equipo2: "México", fecha: "2026-06-24", horaET: "21:00", estadio: "Estadio Ciudad de México" },
+            { id: "54", grupo: "A", equipo1: "Sudáfrica", equipo2: "Corea del Sur", fecha: "2026-06-24", horaET: "21:00", estadio: "Estadio Monterrey" },
+            
+            // === JUEVES 25 DE JUNIO ===
+            { id: "55", grupo: "E", equipo1: "Curazao", equipo2: "Costa de Marfil", fecha: "2026-06-25", horaET: "16:00", estadio: "Estadio Filadelfia" },
+            { id: "56", grupo: "E", equipo1: "Ecuador", equipo2: "Alemania", fecha: "2026-06-25", horaET: "16:00", estadio: "Estadio Nueva York Nueva Jersey" },
+            { id: "57", grupo: "F", equipo1: "Japón", equipo2: "Suecia", fecha: "2026-06-25", horaET: "19:00", estadio: "Estadio Dallas" },
+            { id: "58", grupo: "F", equipo1: "Túnez", equipo2: "Países Bajos", fecha: "2026-06-25", horaET: "19:00", estadio: "Estadio Kansas City" },
+            { id: "59", grupo: "D", equipo1: "Turquía", equipo2: "EE.UU.", fecha: "2026-06-25", horaET: "22:00", estadio: "Estadio Los Ángeles" },
+            { id: "60", grupo: "D", equipo1: "Paraguay", equipo2: "Australia", fecha: "2026-06-25", horaET: "22:00", estadio: "Estadio Bahía de San Francisco" },
+            
+            // === VIERNES 26 DE JUNIO ===
+            { id: "61", grupo: "I", equipo1: "Noruega", equipo2: "Francia", fecha: "2026-06-26", horaET: "15:00", estadio: "Estadio Boston" },
+            { id: "62", grupo: "I", equipo1: "Senegal", equipo2: "Irak", fecha: "2026-06-26", horaET: "15:00", estadio: "Estadio Toronto" },
+            { id: "63", grupo: "H", equipo1: "Cabo Verde", equipo2: "Arabia Saudita", fecha: "2026-06-26", horaET: "20:00", estadio: "Estadio Houston" },
+            { id: "64", grupo: "H", equipo1: "Uruguay", equipo2: "España", fecha: "2026-06-26", horaET: "20:00", estadio: "Estadio Guadalajara" },
+            { id: "65", grupo: "G", equipo1: "Egipto", equipo2: "Irán", fecha: "2026-06-26", horaET: "23:00", estadio: "Estadio Seattle" },
+            { id: "66", grupo: "G", equipo1: "Nueva Zelanda", equipo2: "Bélgica", fecha: "2026-06-26", horaET: "23:00", estadio: "Estadio BC Place Vancouver" },
+            
+            // === SÁBADO 27 DE JUNIO ===
+            { id: "67", grupo: "L", equipo1: "Panamá", equipo2: "Inglaterra", fecha: "2026-06-27", horaET: "17:00", estadio: "Estadio Nueva York Nueva Jersey" },
+            { id: "68", grupo: "L", equipo1: "Croacia", equipo2: "Ghana", fecha: "2026-06-27", horaET: "17:00", estadio: "Estadio Filadelfia" },
+            { id: "69", grupo: "K", equipo1: "Colombia", equipo2: "Portugal", fecha: "2026-06-27", horaET: "19:30", estadio: "Estadio Miami" },
+            { id: "70", grupo: "K", equipo1: "RD Congo", equipo2: "Uzbekistán", fecha: "2026-06-27", horaET: "19:30", estadio: "Estadio Atlanta" },
+            { id: "71", grupo: "J", equipo1: "Argelia", equipo2: "Austria", fecha: "2026-06-27", horaET: "22:00", estadio: "Estadio Kansas City" },
+            { id: "72", grupo: "J", equipo1: "Jordania", equipo2: "Argentina", fecha: "2026-06-27", horaET: "22:00", estadio: "Estadio Dallas" }
+        ];
+
+        // ========================
+        // CONFIGURACIÓN DE GOOGLE SHEETS
+        // ========================
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzApzoBmnFqwsTsXAVOh-x_d9Xaj3lYcwAx_zxgjmaMHC7QaRiy_7ZEQO7uJgKF0KPr/exec";
+
+        // ========================
+        // NOMBRES DE TU FAMILIA
+        // ========================
+        const participantes = ["Luis", "Fernanda", "Gustavo", "Maru", "Isaac", "Lorena", "Jesús", "Francisco", "Sol"];
+        
+        let predicciones = {};
+        let marcadores = {};  // Guardar predicciones de goles
+        let resultadosGoles = {};  // Guardar goles reales
+        let resultadosReales = {};
+        let prediccionesBloqueadas = {};
+
+        function formatearFechaCompleta(fechaStr) {
+            const mapa = {
+                "2026-06-11": "Jueves 11 de junio",
+                "2026-06-12": "Viernes 12 de junio",
+                "2026-06-13": "Sábado 13 de junio",
+                "2026-06-14": "Domingo 14 de junio",
+                "2026-06-15": "Lunes 15 de junio",
+                "2026-06-16": "Martes 16 de junio",
+                "2026-06-17": "Miércoles 17 de junio",
+                "2026-06-18": "Jueves 18 de junio",
+                "2026-06-19": "Viernes 19 de junio",
+                "2026-06-20": "Sábado 20 de junio",
+                "2026-06-21": "Domingo 21 de junio",
+                "2026-06-22": "Lunes 22 de junio",
+                "2026-06-23": "Martes 23 de junio",
+                "2026-06-24": "Miércoles 24 de junio",
+                "2026-06-25": "Jueves 25 de junio",
+                "2026-06-26": "Viernes 26 de junio",
+                "2026-06-27": "Sábado 27 de junio"
+            };
+            return mapa[fechaStr] || fechaStr;
+        }
+
+        function convertirHoraCDMX(horaET) {
+            let [hora, minuto] = horaET.split(':').map(Number);
+            let horaCDMX = hora - 2;
+            let ajusteDia = '';
+            if (horaCDMX < 0) {
+                horaCDMX = 24 + horaCDMX;
+                ajusteDia = ' (día anterior)';
+            }
+            return `${horaCDMX.toString().padStart(2, '0')}:${minuto.toString().padStart(2, '0')}${ajusteDia}`;
+        }
+
+        function generarHTMLPartidos() {
+            const contenedor = document.getElementById('contenedor-partidos');
+            contenedor.innerHTML = '';
+            
+            const partidosPorFecha = {};
+            partidosCalendario.forEach(partido => {
+                if (!partidosPorFecha[partido.fecha]) partidosPorFecha[partido.fecha] = [];
+                partidosPorFecha[partido.fecha].push(partido);
+            });
+            
+            const fechasOrdenadas = Object.keys(partidosPorFecha).sort();
+            
+            fechasOrdenadas.forEach(fecha => {
+                const fechaLegible = formatearFechaCompleta(fecha);
+                const partidosDia = partidosPorFecha[fecha];
+                
+                const diaBloque = document.createElement('div');
+                diaBloque.className = 'dia-bloque';
+                diaBloque.innerHTML = `
+                    <div class="dia-header">
+                        <h3>📅 ${fechaLegible}</h3>
+                        <span class="partidos-count">${partidosDia.length} partidos</span>
+                    </div>
+                    <div class="partidos-dia"></div>
+                `;
+                contenedor.appendChild(diaBloque);
+                
+                const partidosContainer = diaBloque.querySelector('.partidos-dia');
+                
+                partidosDia.forEach(partido => {
+                    const resultadoMostrado = resultadosReales[partido.id] || '';
+                    const resultadoHTML = resultadoMostrado ? `<span class="resultado-real">✅ Real: ${resultadoMostrado}</span>` : '';
+                    const horaCDMX = convertirHoraCDMX(partido.horaET);
+                    
+                    const partidoDiv = document.createElement('div');
+                    partidoDiv.className = 'partido-card';
+                    partidoDiv.innerHTML = `
+                        <div class="partido-info">
+                            <span class="grupo-tag">Grupo ${partido.grupo}</span>
+                            <span class="hora">⏰ ${horaCDMX} h (CDMX) / ${partido.horaET} ET</span>
+                            <span class="estadio">🏟️ ${partido.estadio}</span>
+                            ${resultadoHTML}
+                        </div>
+                        <div class="equipos">
+                            <span class="equipo">${partido.equipo1}</span>
+                            <span class="vs">vs</span>
+                            <span class="equipo">${partido.equipo2}</span>
+                        </div>
+                        <div class="prediccion">
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; width: 100%;">
+                                <select id="sel-${partido.id}" data-partido-id="${partido.id}" style="flex: 2;">
+                                    <option value="">-- Elige ganador --</option>
+                                    <option value="${partido.equipo1}">${partido.equipo1}</option>
+                                    <option value="${partido.equipo2}">${partido.equipo2}</option>
+                                    <option value="Empate">Empate</option>
+                                </select>
+                                <div style="display: flex; gap: 5px; align-items: center;">
+                                    <input type="number" id="goles1-${partido.id}" data-partido-id="${partido.id}" placeholder="${partido.equipo1}" style="width: 70px; padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
+                                    <span>-</span>
+                                    <input type="number" id="goles2-${partido.id}" data-partido-id="${partido.id}" placeholder="${partido.equipo2}" style="width: 70px; padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
+                                </div>
+                            </div>
+                            <span class="puntos-info">⚽ 1 punto por ganador + 2 extra por marcador exacto</span>
+                        </div>
+                    `;
+                    partidosContainer.appendChild(partidoDiv);
+                });
+            });
+        }
+
+        function generarPanelAdmin() {
+            const adminContent = document.getElementById('admin-content');
+            adminContent.innerHTML = `
+                <h4>⚙️ ADMINISTRACIÓN</h4>
+        
+                <div style="background: #f0f0f0; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <h5 style="margin: 0 0 10px 0;">🗑️ Restablecer predicciones de un familiar</h5>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <select id="admin-select-familiar" style="flex: 1;">
+                            ${participantes.map(p => `<option value="${p}">${p}</option>`).join('')}
+                        </select>
+                        <button id="btn-restablecer-familiar" class="btn-admin" style="background: #e67e22;">⚠️ Restablecer predicciones</button>
+                    </div>
+                    <p style="font-size: 0.75rem; margin-top: 8px; color: #e67e22;">⚠️ Esta acción NO se puede deshacer. Borrará todas las predicciones del familiar seleccionado.</p>
+                </div>
+
+                <div style="background: #f0f0f0; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <h5 style="margin: 0 0 10px 0;">🔓 Desbloquear predicciones de un familiar</h5>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <select id="admin-select-desbloquear" style="flex: 1;">
+                            ${participantes.map(p => `<option value="${p}">${p}</option>`).join('')}
+                        </select>
+                        <button id="btn-desbloquear-familiar" class="btn-admin" style="background: #27ae60;">🔓 Desbloquear predicciones</button>
+                    </div>
+                    <p style="font-size: 0.75rem; margin-top: 8px; color: #27ae60;">✅ Permite al familiar modificar sus predicciones nuevamente.</p>
+                </div>
+        
+                <h4>📋 Ingresa los resultados reales de cada partido:</h4>
+            `;
+    
+            // Agregar los partidos para ingresar resultados
+            partidosCalendario.forEach(partido => {
+                const valorActual = resultadosReales[partido.id] || '';
+                const horaCDMX = convertirHoraCDMX(partido.horaET);
+        
+                const div = document.createElement('div');
+                div.className = 'admin-partido';
+                div.innerHTML = `
+                    <div style="min-width: 200px;">
+                        <strong>${partido.equipo1}</strong> vs <strong>${partido.equipo2}</strong> (Grupo ${partido.grupo}) - ${horaCDMX} CDMX
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                        <select id="admin-sel-${partido.id}" data-partido-id="${partido.id}" style="padding: 5px;">
+                            <option value="">-- Ganador --</option>
+                            <option value="${partido.equipo1}" ${valorActual === partido.equipo1 ? 'selected' : ''}>${partido.equipo1}</option>
+                            <option value="${partido.equipo2}" ${valorActual === partido.equipo2 ? 'selected' : ''}>${partido.equipo2}</option>
+                            <option value="Empate" ${valorActual === 'Empate' ? 'selected' : ''}>Empate</option>
+                        </select>
+                        <div style="display: flex; gap: 5px; align-items: center;">
+                            <input type="number" id="admin-goles1-${partido.id}" data-partido-id="${partido.id}" placeholder="Goles ${partido.equipo1}" style="width: 70px; padding: 5px;">
+                            <span>-</span>
+                            <input type="number" id="admin-goles2-${partido.id}" data-partido-id="${partido.id}" placeholder="Goles ${partido.equipo2}" style="width: 70px; padding: 5px;">
+                        </div>
+                    </div>
+                `;
+                adminContent.appendChild(div);
+            });
+    
+            // Botón guardar resultados
+            const btnGuardarResultados = document.createElement('button');
+            btnGuardarResultados.textContent = '💾 Guardar todos los resultados';
+            btnGuardarResultados.className = 'btn-admin';
+            btnGuardarResultados.style.marginTop = '15px';
+            btnGuardarResultados.addEventListener('click', guardarResultadosDesdeAdmin);
+            adminContent.appendChild(btnGuardarResultados);
+    
+            // Botón para restablecer predicciones de un familiar
+            const btnRestablecer = document.getElementById('btn-restablecer-familiar');
+            if (btnRestablecer) {
+                btnRestablecer.addEventListener('click', () => {
+                    const familiarSeleccionado = document.getElementById('admin-select-familiar').value;
+                    if (confirm(`⚠️ ¿Estás SEGURO? Vas a borrar TODAS las predicciones de ${familiarSeleccionado}. Esta acción NO se puede deshacer.`)) {
+                        if (confirm(`Última confirmación: ¿Borrar predicciones de ${familiarSeleccionado}?`)) {
+                            // Borrar localmente
+                            delete predicciones[familiarSeleccionado];
+                            delete marcadores[familiarSeleccionado];
+                            delete prediccionesBloqueadas[familiarSeleccionado];
+                
+                            // Guardar cambios en localStorage
+                            localStorage.setItem('quiniela_predicciones', JSON.stringify(predicciones));
+                            localStorage.setItem('quiniela_marcadores', JSON.stringify(marcadores));
+                            localStorage.setItem('quiniela_bloqueadas', JSON.stringify(prediccionesBloqueadas));
+                
+                            // Notificar a Google que este familiar debe borrar sus datos locales
+                            notificarBorradoEnGoogle(familiarSeleccionado);
+                
+                            // Si el familiar actualmente seleccionado es el que se borró, limpiar la interfaz
+                            const participanteActual = document.getElementById('selector-familiar').value;
+                            if (participanteActual === familiarSeleccionado) {
+                                // Limpiar los selects y inputs
+                                document.querySelectorAll('select[data-partido-id]').forEach(select => {
+                                    select.value = '';
+                                });
+                                document.querySelectorAll('input[type="number"]').forEach(input => {
+                                    input.value = '';
+                                });
+                                // Habilitar campos si estaban bloqueados
+                                document.querySelectorAll('select[data-partido-id]').forEach(select => {
+                                    select.disabled = false;
+                                });
+                                document.querySelectorAll('input[type="number"]').forEach(input => {
+                                    input.disabled = false;
+                                });
+                                const mensajeBloqueo = document.getElementById('mensaje-bloqueo');
+                                if (mensajeBloqueo) mensajeBloqueo.remove();
+                            }
+                
+                            alert(`✅ Se han borrado todas las predicciones de ${familiarSeleccionado}`);
+                            actualizarTablaGeneral();
+                            actualizarEstadisticas();
+                            actualizarTablasPorFase();
+                            generarPanelAdmin(); // Recargar el panel
+                        }
+                    }
+                });
+            }
+
+            const btnDesbloquear = document.getElementById('btn-desbloquear-familiar');
+            if (btnDesbloquear) {
+                btnDesbloquear.addEventListener('click', () => {
+                    const familiarSeleccionado = document.getElementById('admin-select-desbloquear').value;
+                    if (confirm(`¿Desbloquear las predicciones de ${familiarSeleccionado}? Podrá modificarlas nuevamente.`)) {
+                        desbloquearFamiliar(familiarSeleccionado);
+                    }
+                });
+            }
+        }
+           
+        function guardarResultadosDesdeAdmin() {
+            document.querySelectorAll('#admin-content select[data-partido-id]').forEach(select => {
+                const partidoId = select.getAttribute('data-partido-id');
+                const valor = select.value;
+                if (valor) resultadosReales[partidoId] = valor;
+                else delete resultadosReales[partidoId];
+            });
+    
+            document.querySelectorAll('#admin-content input[type="number"]').forEach(input => {
+                const partidoId = input.getAttribute('data-partido-id');
+                const valor = parseInt(input.value);
+                if (!isNaN(valor)) {
+                    if (!resultadosGoles[partidoId]) resultadosGoles[partidoId] = {};
+                    if (input.id.includes('goles1')) {
+                        resultadosGoles[partidoId].goles1 = valor;
+                    } else {
+                        resultadosGoles[partidoId].goles2 = valor;
+                    }
+                }
+            });
+    
+            // Guardar en localStorage
+            localStorage.setItem('quiniela_resultados', JSON.stringify(resultadosReales));
+            localStorage.setItem('quiniela_resultados_goles', JSON.stringify(resultadosGoles));
+    
+            // Guardar en Google Sheets
+            guardarResultadosEnGoogle(resultadosReales, resultadosGoles);
+    
+            generarHTMLPartidos();
+            const participanteActual = document.getElementById('selector-familiar').value;
+            cargarPrediccionesEnFormulario(participanteActual);
+            actualizarTablaGeneral();
+            actualizarTablaPosiciones();
+            actualizarEstadisticas();
+            actualizarTablasPorFase();
+            alert('✅ Resultados guardados correctamente');
+        }
+
+        function cargarPrediccionesEnFormulario(participante) {
+            const preds = predicciones[participante] || {};
+            const marks = marcadores[participante] || {};
+    
+            document.querySelectorAll('select[data-partido-id]').forEach(select => {
+                const partidoId = select.getAttribute('data-partido-id');
+                select.value = preds[partidoId] || '';
+            });
+    
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                const partidoId = input.getAttribute('data-partido-id');
+                input.value = marks[partidoId]?.[input.id.includes('goles1') ? 'goles1' : 'goles2'] || '';
+            });
+
+            // NUEVO: Verificar bloqueo
+            if (prediccionesBloqueadas[participante]) {
+                bloquearCamposDelFamiliar(participante);
+            } else {
+                // Asegurar que los campos estén habilitados
+                document.querySelectorAll('select[data-partido-id]').forEach(select => {
+                    select.disabled = false;
+                });
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.disabled = false;
+                });
+                const mensajeBloqueo = document.getElementById('mensaje-bloqueo');
+                if (mensajeBloqueo) mensajeBloqueo.remove();
+            }
+        }
+
+        function guardarPrediccionesDesdeFormulario() {
+            const participanteActual = document.getElementById('selector-familiar').value;
+    
+            // Verificar si ya está bloqueado
+            if (prediccionesBloqueadas[participanteActual]) {
+                alert(`🔒 ${participanteActual} ya tiene sus predicciones bloqueadas. No se pueden modificar.`);
+                return;
+            }
+    
+            // Confirmación doble
+            const confirmacion1 = confirm(`⚠️ ¿Estás SEGURO que quieres guardar tus predicciones para ${participanteActual}?\n\n⚠️ UNA VEZ GUARDADAS YA NO PODRÁS MODIFICARLAS.`);
+            if (!confirmacion1) return;
+    
+            const confirmacion2 = confirm(`Última oportunidad: ¿Guardar predicciones de ${participanteActual} definitivamente?`);
+            if (!confirmacion2) return;
+    
+            let errores = 0;
+            let mensajesError = [];
+    
+            // Recopilar datos
+            const datosPartidos = {};
+    
+            document.querySelectorAll('select[data-partido-id]').forEach(select => {
+                const partidoId = select.getAttribute('data-partido-id');
+                const ganadorElegido = select.value;
+                datosPartidos[partidoId] = { ganador: ganadorElegido, goles1: null, goles2: null };
+            });
+    
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                const partidoId = input.getAttribute('data-partido-id');
+                const valor = parseInt(input.value);
+                if (!isNaN(valor)) {
+                    if (input.id.includes('goles1')) {
+                        datosPartidos[partidoId].goles1 = valor;
+                    } else {
+                        datosPartidos[partidoId].goles2 = valor;
+                    }
+                }
+            });
+    
+            // Validaciones
+            for (const [partidoId, datos] of Object.entries(datosPartidos)) {
+                const ganador = datos.ganador;
+                const goles1 = datos.goles1;
+                const goles2 = datos.goles2;
+                const partido = partidosCalendario.find(p => p.id === partidoId);
+                const eq1 = partido?.equipo1 || "Local";
+                const eq2 = partido?.equipo2 || "Visitante";
+        
+                if (!ganador && (goles1 !== null || goles2 !== null)) {
+                    errores++;
+                    mensajesError.push(`❌ ${eq1} vs ${eq2}: Elegiste marcador pero no elegiste ganador.`);
+                    continue;
+                }
+        
+                if (ganador && (goles1 !== null && goles2 !== null)) {
+                    const esEmpate = (goles1 === goles2);
+            
+                    if (ganador === "Empate" && !esEmpate) {
+                        errores++;
+                        mensajesError.push(`❌ ${eq1} vs ${eq2}: Elegiste EMPATE pero el marcador no es empate.`);
+                        continue;
+                    }
+            
+                    if (ganador !== "Empate" && esEmpate) {
+                        errores++;
+                        mensajesError.push(`❌ ${eq1} vs ${eq2}: Elegiste que gana ${ganador} pero el marcador es empate.`);
+                        continue;
+                    }
+            
+                    if (ganador !== "Empate" && ganador === eq1 && goles1 < goles2) {
+                        errores++;
+                        mensajesError.push(`❌ ${eq1} vs ${eq2}: Elegiste que gana ${eq1} pero el marcador indica que gana ${eq2}.`);
+                        continue;
+                    }
+            
+                    if (ganador !== "Empate" && ganador === eq2 && goles2 < goles1) {
+                        errores++;
+                        mensajesError.push(`❌ ${eq1} vs ${eq2}: Elegiste que gana ${eq2} pero el marcador indica que gana ${eq1}.`);
+                        continue;
+                    }
+                }
+            }
+    
+            if (errores > 0) {
+                let mensaje = `⚠️ Se encontraron ${errores} error(es):\n\n`;
+                mensaje += mensajesError.join('\n');
+                mensaje += `\n\n💡 Corrige y vuelve a guardar.`;
+                alert(mensaje);
+                return;
+            }
+    
+            // Guardar datos
+            if (!predicciones[participanteActual]) predicciones[participanteActual] = {};
+            if (!marcadores[participanteActual]) marcadores[participanteActual] = {};
+    
+            for (const [partidoId, datos] of Object.entries(datosPartidos)) {
+                const ganador = datos.ganador;
+                const goles1 = datos.goles1;
+                const goles2 = datos.goles2;
+        
+                if (ganador) {
+                    predicciones[participanteActual][partidoId] = ganador;
+                } else {
+                    delete predicciones[participanteActual][partidoId];
+                }
+        
+                if (goles1 !== null && goles2 !== null) {
+                    if (!marcadores[participanteActual][partidoId]) marcadores[participanteActual][partidoId] = {};
+                    marcadores[participanteActual][partidoId].goles1 = goles1;
+                    marcadores[participanteActual][partidoId].goles2 = goles2;
+                } else {
+                    delete marcadores[participanteActual][partidoId];
+                }
+            }
+    
+            // Bloquear las predicciones
+            prediccionesBloqueadas[participanteActual] = true;
+    
+            // Guardar en localStorage
+            localStorage.setItem('quiniela_predicciones', JSON.stringify(predicciones));
+            localStorage.setItem('quiniela_marcadores', JSON.stringify(marcadores));
+            localStorage.setItem('quiniela_bloqueadas', JSON.stringify(prediccionesBloqueadas));
+    
+            // Guardar en Google Sheets
+            guardarPrediccionesEnGoogle(participanteActual, predicciones[participanteActual], marcadores[participanteActual]);
+    
+            // Deshabilitar los campos en la interfaz
+            bloquearCamposDelFamiliar(participanteActual);
+    
+            alert(`🔒 ¡Predicciones de ${participanteActual} guardadas y BLOQUEADAS! Ya no se pueden modificar.`);
+            actualizarTablaGeneral();
+            actualizarEstadisticas();
+            actualizarTablasPorFase();
+        }
+            
+        function actualizarTablaGeneral() {
+            const puntosPorParticipante = {};
+            participantes.forEach(p => { puntosPorParticipante[p] = 0; });
+    
+            for (const participante of participantes) {
+                const preds = predicciones[participante] || {};           // Ganador que predijo
+                const marks = marcadores[participante] || {};            // Goles que predijo
+        
+                for (const [partidoId, equipoPredicho] of Object.entries(preds)) {
+                    const resultadoReal = resultadosReales[partidoId];
+            
+                    // ===== PUNTO 1: Acierto de ganador =====
+                    if (resultadoReal && equipoPredicho === resultadoReal) {
+                        puntosPorParticipante[participante] += 1;   // 1 punto por ganador
+                    }
+            
+                    // ===== PUNTO 2: Acierto de marcador exacto (2 puntos extra) =====
+                    const marcadorPredicho = marks[partidoId];           // Ej: { goles1: 2, goles2: 1 }
+                    const marcadorReal = resultadosGoles[partidoId];     // Ej: { goles1: 2, goles2: 1 }
+            
+                    if (marcadorPredicho && marcadorReal) {
+                        const aciertoGoles1 = (marcadorPredicho.goles1 === marcadorReal.goles1);
+                        const aciertoGoles2 = (marcadorPredicho.goles2 === marcadorReal.goles2);
+                
+                        if (aciertoGoles1 && aciertoGoles2) {
+                            puntosPorParticipante[participante] += 2;   // 2 puntos extra
+                        }
+                    }
+                }
+            }
+    
+            // Ordenar y mostrar la tabla (esto ya lo tenías)
+            const ranking = participantes.map(p => ({ nombre: p, puntos: puntosPorParticipante[p] }));
+            ranking.sort((a, b) => b.puntos - a.puntos);
+    
+            let html = '<table><th>🏅 Posición</th><th>👤 Participante</th><th>⭐ Puntos</th></tr>';
+            ranking.forEach((item, idx) => {
+                html += `<tr>
+                            <td><strong>${idx + 1}º</strong></td>
+                            <td>${item.nombre}</td>
+                            <td class="puntos-actuales">${item.puntos}</td>
+                        </tr>`;
+            });
+            html += '</table>';
+            document.getElementById('tabla-general-contenido').innerHTML = html;
+        }
+
+        // ========================
+        // ESTADÍSTICAS POR FAMILIAR
+        // ========================
+        function actualizarEstadisticas() {
+            const estadisticas = {};
+    
+            // Inicializar estadísticas para cada participante
+            participantes.forEach(p => {
+                estadisticas[p] = {
+                    aciertosGanador: 0,
+                    aciertosMarcador: 0,
+                    totalPartidosConResultado: 0,
+                    rachaActual: 0,
+                    mejorRacha: 0,
+                    puntosPorFase: { grupos: 0 },
+                    logros: []
+                };
+            });
+    
+            // Contar partidos con resultado real disponible
+            let partidosConResultado = 0;
+            const resultadosPorPartido = {};
+    
+            partidosCalendario.forEach(partido => {
+                const resultadoReal = resultadosReales[partido.id];
+                if (resultadoReal) {
+                    partidosConResultado++;
+                    resultadosPorPartido[partido.id] = {
+                        ganador: resultadoReal,
+                        goles1: resultadosGoles[partido.id]?.goles1,
+                        goles2: resultadosGoles[partido.id]?.goles2
+                    };
+                }
+            });
+    
+            // Procesar cada participante
+            for (const participante of participantes) {
+                const preds = predicciones[participante] || {};
+                const marks = marcadores[participante] || {};
+        
+                let rachaActual = 0;
+                let mejorRacha = 0;
+        
+                // Recorrer partidos en orden cronológico para calcular racha
+                const partidosOrdenados = [...partidosCalendario].sort((a, b) => a.fecha.localeCompare(b.fecha));
+        
+                for (const partido of partidosOrdenados) {
+                    const resultadoReal = resultadosReales[partido.id];
+                    if (!resultadoReal) continue; // Solo contar partidos con resultado
+            
+                    estadisticas[participante].totalPartidosConResultado++;
+            
+                    const ganadorPredicho = preds[partido.id];
+                    const marcadorPredicho = marks[partido.id];
+                    const marcadorReal = resultadosGoles[partido.id];
+            
+                    let acertoGanador = false;
+                    let acertoMarcador = false;
+            
+                    // Verificar acierto de ganador
+                    if (ganadorPredicho && ganadorPredicho === resultadoReal) {
+                        estadisticas[participante].aciertosGanador++;
+                        acertoGanador = true;
+                    }
+            
+                    // Verificar acierto de marcador exacto
+                    if (marcadorPredicho && marcadorReal &&
+                        marcadorPredicho.goles1 === marcadorReal.goles1 &&
+                        marcadorPredicho.goles2 === marcadorReal.goles2) {
+                        estadisticas[participante].aciertosMarcador++;
+                        acertoMarcador = true;
+                    }
+            
+                    // Calcular racha (acierto de ganador)
+                    if (acertoGanador) {
+                        rachaActual++;
+                        if (rachaActual > mejorRacha) mejorRacha = rachaActual;
+                    } else {
+                        rachaActual = 0;
+                    }
+                }
+        
+                estadisticas[participante].rachaActual = rachaActual;
+                estadisticas[participante].mejorRacha = mejorRacha;
+        
+                // Calcular porcentaje de aciertos
+                const totalConResultado = estadisticas[participante].totalPartidosConResultado;
+                const aciertos = estadisticas[participante].aciertosGanador;
+                estadisticas[participante].porcentajeAciertos = totalConResultado > 0 
+                    ? Math.round((aciertos / totalConResultado) * 100) 
+                    : 0;
+        
+                // ========== LOGROS (MEDALLAS) ==========
+                const logros = [];
+        
+                // Logro 1: Pleno (10+ aciertos en una jornada - simplificado)
+                if (estadisticas[participante].aciertosGanador >= 10) {
+                    logros.push({ nombre: "🏅 Pleno", descripcion: "10 o más aciertos" });
+                }
+        
+                // Logro 2: Visionario (3+ marcadores exactos)
+                if (estadisticas[participante].aciertosMarcador >= 3) {
+                    logros.push({ nombre: "🎯 Visionario", descripcion: "3+ marcadores exactos" });
+                }
+        
+                // Logro 3: Racha de oro (5+ aciertos seguidos)
+                if (estadisticas[participante].mejorRacha >= 5) {
+                    logros.push({ nombre: "⚡ Racha de oro", descripcion: `${estadisticas[participante].mejorRacha} aciertos seguidos` });
+                }
+        
+                // Logro 4: Precisión suprema (80%+ de aciertos)
+                if (estadisticas[participante].porcentajeAciertos >= 80) {
+                    logros.push({ nombre: "🎯 Precisión suprema", descripcion: `${estadisticas[participante].porcentajeAciertos}% de aciertos` });
+                }
+        
+                // Logro 5: Participante activo (predijo al menos 1 partido)
+                const totalPredicho = Object.keys(preds).length;
+                if (totalPredicho > 0) {
+                    logros.push({ nombre: "📋 Participante activo", descripcion: `${totalPredicho} partidos pronosticados` });
+                }
+        
+                estadisticas[participante].logros = logros;
+            }
+    
+            // Generar HTML
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px;">';
+    
+            for (const participante of participantes) {
+                const stats = estadisticas[participante];
+                const logrosHtml = stats.logros.length > 0 
+                    ? stats.logros.map(l => `<span style="display: inline-block; background: #f0f0f0; padding: 5px 10px; margin: 3px; border-radius: 15px; font-size: 0.75rem;">${l.nombre}</span>`).join('')
+                    : '<span style="color: #999;">Aún sin logros</span>';
+        
+                html += `
+                    <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="background: linear-gradient(135deg, #2c3e50, #1a472a); color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 1.2rem;">
+                            👤 ${participante}
+                        </div>
+                        <div style="padding: 15px;">
+                            <table style="width: 100%; font-size: 0.85rem;">
+                                <tr><td><strong>🎯 Aciertos (ganador)</strong></td><td style="text-align: right;">${stats.aciertosGanador}</td></tr>
+                                <tr><td><strong>📊 Porcentaje de aciertos</strong></td><td style="text-align: right;">${stats.porcentajeAciertos}%</td></tr>
+                                <tr><td><strong>🎯 Marcadores exactos</strong></td><td style="text-align: right;">${stats.aciertosMarcador}</td></tr>
+                                <tr><td><strong>⚡ Racha actual</strong></td><td style="text-align: right;">${stats.rachaActual}</td></tr>
+                                <tr><td><strong>🏆 Mejor racha</strong></td><td style="text-align: right;">${stats.mejorRacha}</td></tr>
+                                <tr><td><strong>📋 Partidos con resultado</strong></td><td style="text-align: right;">${stats.totalPartidosConResultado}</td></tr>
+                            </table>
+                            <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #eee;">
+                                <strong>🏅 Logros:</strong><br>
+                                <div style="margin-top: 5px;">${logrosHtml}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+    
+            html += '</div>';
+            document.getElementById('estadisticas-familiares').innerHTML = html;
+        }
+
+        // ========================
+        // PUNTUACIÓN POR FASE
+        // ========================
+
+        // Función auxiliar para calcular puntos de un participante en una lista de partidos específica
+        function calcularPuntosEnPartidos(participante, listaPartidos) {
+            const preds = predicciones[participante] || {};
+            const marks = marcadores[participante] || {};
+            let puntos = 0;
+            let aciertosGanador = 0;
+            let aciertosMarcador = 0;
+    
+            for (const partido of listaPartidos) {
+                const resultadoReal = resultadosReales[partido.id];
+                const ganadorPredicho = preds[partido.id];
+        
+                // Punto por ganador
+                if (resultadoReal && ganadorPredicho === resultadoReal) {
+                    puntos += 1;
+                    aciertosGanador++;
+                }
+        
+                // Puntos extra por marcador exacto
+                const marcadorPredicho = marks[partido.id];
+                const marcadorReal = resultadosGoles[partido.id];
+                if (marcadorPredicho && marcadorReal &&
+                    marcadorPredicho.goles1 === marcadorReal.goles1 &&
+                    marcadorPredicho.goles2 === marcadorReal.goles2) {
+                    puntos += 2;
+                    aciertosMarcador++;
+                }
+            }
+    
+            return { puntos, aciertosGanador, aciertosMarcador };
+        }
+
+        // Actualizar todas las tablas por fase
+        function actualizarTablasPorFase() {
+            // Fase de Grupos: todos los partidos (por ahora)
+            const partidosGrupos = partidosCalendario;
+    
+            // Calcular puntos por fase para cada participante
+            const tablaGrupos = [];
+    
+            for (const participante of participantes) {
+                const { puntos, aciertosGanador, aciertosMarcador } = calcularPuntosEnPartidos(participante, partidosGrupos);
+                tablaGrupos.push({ nombre: participante, puntos, aciertosGanador, aciertosMarcador });
+            }
+    
+            // Ordenar por puntos
+            tablaGrupos.sort((a, b) => b.puntos - a.puntos);
+    
+            // Generar HTML para Fase de Grupos
+            let htmlGrupos = `
+                <table style="width: 100%;">
+                    <thead>
+                        <tr><th>🏅 Posición</th><th>👤 Participante</th><th>⭐ Puntos</th><th>🎯 Aciertos</th><th>🎯 Marcadores Exactos</th></tr>
+                    </thead>
+                    <tbody>
+            `;
+            tablaGrupos.forEach((item, idx) => {
+                htmlGrupos += `
+                    <tr style="text-align: center;">
+                        <td><strong>${idx + 1}º</strong></td>
+                        <td>${item.nombre}</td>
+                        <td><strong>${item.puntos}</strong></td>
+                        <td>${item.aciertosGanador}</td>
+                        <td>${item.aciertosMarcador}</td>
+                    </tr>
+                `;
+            });
+            htmlGrupos += `</tbody></table>`;
+            document.getElementById('tabla-puntos-grupos').innerHTML = htmlGrupos;
+    
+            // Para las demás fases, mostrar mensaje de "próximamente" (cuando se agreguen partidos)
+            const fasesPosteriores = ['16avos', 'octavos', 'cuartos', 'semis', 'final'];
+            fasesPosteriores.forEach(fase => {
+                const elemento = document.getElementById(`tabla-puntos-${fase}`);
+                if (elemento && elemento.innerHTML.includes('aún no disponibles')) {
+                    // Mantener el mensaje por defecto
+                }
+            });
+        }
+
+        // ========================
+        // FUNCIONES PARA GOOGLE SHEETS
+        // ========================
+
+        async function guardarPrediccionesEnGoogle(participante, prediccionesObj, marcadoresObj) {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        accion: 'guardarPredicciones',
+                        participante: participante,
+                        predicciones: prediccionesObj,
+                        marcadores: marcadoresObj
+                    })
+                });
+                console.log(`Predicciones de ${participante} guardadas en Google`);
+                return true;
+            } catch (error) {
+                console.error('Error guardando en Google:', error);
+                return false;
+            }
+        }
+
+        async function cargarPrediccionesDesdeGoogle(participante) {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        accion: 'cargarPredicciones',
+                        participante: participante
+                    })
+                });
+        
+                // Como estamos en modo no-cors, no podemos leer la respuesta directamente
+                // Por ahora usamos solo localStorage, pero lo dejamos preparado
+                console.log(`Solicitud de carga para ${participante} enviada a Google`);
+                return null;
+            } catch (error) {
+                console.error('Error cargando desde Google:', error);
+                return null;
+            }
+        }
+
+        async function guardarResultadosEnGoogle(resultadosObj, resultadosGolesObj) {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        accion: 'guardarResultados',
+                        resultados: resultadosObj,
+                        resultadosGoles: resultadosGolesObj
+                    })
+                });
+                console.log('Resultados guardados en Google');
+                return true;
+            } catch (error) {
+                console.error('Error guardando resultados en Google:', error);
+                return false;
+            }
+        }
+
+        async function cargarResultadosDesdeGoogle() {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        accion: 'cargarResultados'
+                    })
+                });
+                console.log('Solicitud de carga de resultados enviada a Google');
+                return null;
+            } catch (error) {
+                console.error('Error cargando resultados desde Google:', error);
+                return null;
+            }
+        }
+
+        async function notificarBorradoEnGoogle(participante) {
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        accion: 'borrarPredicciones',
+                        participante: participante
+                    })
+                });
+                console.log(`Notificación de borrado para ${participante} enviada a Google`);
+            } catch (error) {
+                console.error('Error notificando borrado:', error);
+            }
+        }
+
+        function bloquearCamposDelFamiliar(participante) {
+            if (!prediccionesBloqueadas[participante]) return;
+    
+            // Deshabilitar todos los selects y inputs
+            document.querySelectorAll('select[data-partido-id]').forEach(select => {
+                select.disabled = true;
+            });
+    
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.disabled = true;
+            });
+    
+            // Mostrar mensaje de bloqueo en la interfaz
+            const selectorContainer = document.querySelector('.selector-familiar');
+            let mensajeBloqueo = document.getElementById('mensaje-bloqueo');
+            if (!mensajeBloqueo) {
+                mensajeBloqueo = document.createElement('div');
+                mensajeBloqueo.id = 'mensaje-bloqueo';
+                mensajeBloqueo.style.cssText = 'background: #e74c3c; color: white; padding: 10px; border-radius: 8px; margin-top: 10px; text-align: center; font-weight: bold;';
+                selectorContainer.appendChild(mensajeBloqueo);
+            }
+            mensajeBloqueo.innerHTML = `🔒 ${participante} tiene sus predicciones BLOQUEADAS. No puede modificarlas. El administrador puede desbloquearlas desde el panel.`;
+        }
+
+        function desbloquearFamiliar(participante) {
+            delete prediccionesBloqueadas[participante];
+            localStorage.setItem('quiniela_bloqueadas', JSON.stringify(prediccionesBloqueadas));
+    
+            // Si es el familiar actualmente seleccionado, habilitar campos
+            const participanteActual = document.getElementById('selector-familiar').value;
+            if (participanteActual === participante) {
+                document.querySelectorAll('select[data-partido-id]').forEach(select => {
+                    select.disabled = false;
+                });
+                document.querySelectorAll('input[type="number"]').forEach(input => {
+                    input.disabled = false;
+                });
+                const mensajeBloqueo = document.getElementById('mensaje-bloqueo');
+                if (mensajeBloqueo) mensajeBloqueo.remove();
+            }
+    
+            alert(`✅ ${participante} ha sido desbloqueado. Ahora puede modificar sus predicciones.`);
+            actualizarTablaGeneral();
+        }
+
+        // ========================
+        // SISTEMA DE PESTAÑAS
+        // ========================
+        function initTabs() {
+            const tabs = ['general', 'posiciones', 'fase-grupos', '16avos', 'octavos', 'cuartos', 'semis', 'final'];
+    
+            tabs.forEach(tab => {
+                const btn = document.getElementById(`tab-${tab}`);
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        // Ocultar todos los contenidos
+                        document.querySelectorAll('.tab-contenido').forEach(content => {
+                            content.style.display = 'none';
+                        });
+                        // Mostrar el contenido seleccionado
+                        const contenido = document.getElementById(`contenido-tab-${tab}`);
+                        if (contenido) contenido.style.display = 'block';
+                
+                        // Cambiar estilos de los botones
+                        document.querySelectorAll('.tab-button').forEach(b => {
+                            b.style.background = '#34495e';
+                        });
+                        btn.style.background = '#1a472a';
+                    });
+                }
+            });
+        }
+
+        // ========================
+        // TABLA DE POSICIONES REAL POR GRUPO
+        // ========================
+        function actualizarTablaPosiciones() {
+            // Estructura para almacenar estadísticas por grupo y equipo
+            const grupos = {};
+    
+            // Inicializar grupos A hasta L
+            for (let i = 65; i <= 76; i++) { // Códigos ASCII: A=65, L=76
+                const letraGrupo = String.fromCharCode(i);
+                grupos[letraGrupo] = {};
+            }
+    
+            // Procesar cada partido con resultado real
+            partidosCalendario.forEach(partido => {
+                const resultado = resultadosReales[partido.id];
+                if (!resultado) return; // Si no hay resultado, no procesar
+        
+                const grupo = partido.grupo;
+                const eq1 = partido.equipo1;
+                const eq2 = partido.equipo2;
+        
+                // Inicializar equipos si no existen
+                if (!grupos[grupo][eq1]) {
+                    grupos[grupo][eq1] = { pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, pts: 0 };
+                }
+                if (!grupos[grupo][eq2]) {
+                    grupos[grupo][eq2] = { pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, pts: 0 };
+                }
+        
+                // Calcular según el resultado (por ahora solo usamos quién ganó)
+                // NOTA: Como aún no tenemos goles, solo calculamos PG, PE, PP, PTS
+                // Más adelante agregaremos GF, GC cuando tengamos marcadores exactos
+                const eq1Estadisticas = grupos[grupo][eq1];
+                const eq2Estadisticas = grupos[grupo][eq2];
+        
+                eq1Estadisticas.pj++;
+                eq2Estadisticas.pj++;
+        
+                if (resultado === eq1) {
+                    eq1Estadisticas.pg++;
+                    eq1Estadisticas.pts += 3;
+                    eq2Estadisticas.pp++;
+                } else if (resultado === eq2) {
+                    eq2Estadisticas.pg++;
+                    eq2Estadisticas.pts += 3;
+                    eq1Estadisticas.pp++;
+                } else if (resultado === "Empate") {
+                    eq1Estadisticas.pe++;
+                    eq1Estadisticas.pts += 1;
+                    eq2Estadisticas.pe++;
+                    eq2Estadisticas.pts += 1;
+                }
+            });
+    
+            // Generar HTML para cada grupo
+            let htmlTotal = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+    
+            for (let i = 65; i <= 76; i++) {
+                const letraGrupo = String.fromCharCode(i);
+                const equipos = grupos[letraGrupo];
+                const equiposArray = Object.entries(equipos);
+        
+                if (equiposArray.length === 0) {
+                    htmlTotal += `
+                        <div style="background: white; border-radius: 12px; overflow: hidden;">
+                            <div style="background: #2c3e50; color: white; padding: 10px; text-align: center; font-weight: bold;">Grupo ${letraGrupo}</div>
+                            <div style="padding: 20px; text-align: center; color: #999;">Sin resultados aún</div>
+                        </div>
+                    `;
+                    continue;
+                }
+        
+                // Ordenar por puntos (y luego por diferencia de goles cuando tengamos)
+                equiposArray.sort((a, b) => b[1].pts - a[1].pts);
+        
+                let htmlGrupo = `
+                    <div style="background: white; border-radius: 12px; overflow: hidden;">
+                        <div style="background: #2c3e50; color: white; padding: 10px; text-align: center; font-weight: bold;">Grupo ${letraGrupo}</div>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; font-size: 0.8rem;">
+                                <thead>
+                                    <tr>
+                                        <th>#</th><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>PTS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+        
+                equiposArray.forEach(([equipo, stats], idx) => {
+                    htmlGrupo += `
+                        <tr style="text-align: center;">
+                            <td><strong>${idx + 1}</strong></td>
+                            <td style="text-align: left;">${equipo}</td>
+                            <td>${stats.pj}</td>
+                            <td>${stats.pg}</td>
+                            <td>${stats.pe}</td>
+                            <td>${stats.pp}</td>
+                            <td><strong>${stats.pts}</strong></td>
+                        </tr>
+                    `;
+                });
+        
+                htmlGrupo += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                htmlTotal += htmlGrupo;
+            }
+    
+            htmlTotal += '</div>';
+    
+            // Agregar nota explicativa
+            htmlTotal += '<p style="color: white; font-size: 0.7rem; text-align: center; margin-top: 15px;">📌 Nota: Los goles a favor y en contra se mostrarán cuando se implemente la predicción de marcador exacto.</p>';
+    
+            document.getElementById('tabla-posiciones').innerHTML = htmlTotal;
+        }
+
+        function cargarDatosIniciales() {
+            // 1. Cargar predicciones de ganador
+            const prediccionesGuardadas = localStorage.getItem('quiniela_predicciones');
+            if (prediccionesGuardadas) predicciones = JSON.parse(prediccionesGuardadas);
+    
+            // 2. Cargar resultados reales de ganador
+            const resultadosGuardados = localStorage.getItem('quiniela_resultados');
+            if (resultadosGuardados) resultadosReales = JSON.parse(resultadosGuardados);
+    
+            // 3. Cargar predicciones de goles (marcadores)
+            const marcadoresGuardados = localStorage.getItem('quiniela_marcadores');
+            if (marcadoresGuardados) marcadores = JSON.parse(marcadoresGuardados);
+    
+            // 4. Cargar resultados reales de goles
+            const resultadosGolesGuardados = localStorage.getItem('quiniela_resultados_goles');
+            if (resultadosGolesGuardados) resultadosGoles = JSON.parse(resultadosGolesGuardados);
+
+            const bloqueadasGuardadas = localStorage.getItem('quiniela_bloqueadas');
+            if (bloqueadasGuardadas) prediccionesBloqueadas = JSON.parse(bloqueadasGuardadas);
+    
+            // 5. Actualizar las tablas
+            actualizarTablaGeneral();
+            actualizarTablaPosiciones();
+            actualizarEstadisticas();
+            actualizarTablasPorFase();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generarHTMLPartidos();
+            cargarDatosIniciales();
+            initTabs();
+            
+            document.getElementById('btn-cargar').addEventListener('click', () => {
+                const participante = document.getElementById('selector-familiar').value;
+                cargarPrediccionesEnFormulario(participante);
+            });
+            
+            document.getElementById('btn-guardar').addEventListener('click', guardarPrediccionesDesdeFormulario);
+            
+            const adminPanel = document.getElementById('admin-panel');
+            const btnMostrarAdmin = document.getElementById('btn-mostrar-admin');
+            const btnCerrarAdmin = document.getElementById('btn-cerrar-admin');
+            
+            // ==========  CONTRASEÑA PARA ADMIN ==========
+            const ADMIN_PASSWORD = "familia2026";  // 
+    
+            function mostrarAdminConPassword() {
+                const passwordIngresada = prompt("🔒 Ingrese la contraseña de administrador:");
+                if (passwordIngresada === ADMIN_PASSWORD) {
+                    adminPanel.classList.add('visible');
+                    generarPanelAdmin();
+                } else if (passwordIngresada !== null) {
+                    alert("❌ Contraseña incorrecta. No tienes acceso al panel de administración.");
+                }
+            }
+    
+            btnMostrarAdmin.addEventListener('click', mostrarAdminConPassword);
+            // ================================================
+    
+            btnCerrarAdmin.addEventListener('click', () => {
+                adminPanel.classList.remove('visible');
+            });
+    
+            document.getElementById('titulo-principal').addEventListener('dblclick', mostrarAdminConPassword);
+        });
+    </script>
+</body>
+</html>

@@ -561,7 +561,7 @@
         // ========================
         // CONFIGURACIÓN DE GOOGLE SHEETS
         // ========================
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzApzoBmnFqwsTsXAVOh-x_d9Xaj3lYcwAx_zxgjmaMHC7QaRiy_7ZEQO7uJgKF0KPr/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTn5xJfwaqVGNJZgqqeePhLMN6Oe-tELgOy2PJCdNSUM4HRuqUokX99_EtApZ96wHx/exec";
 
         // ========================
         // NOMBRES DE TU FAMILIA
@@ -885,6 +885,16 @@
                     const familiarSeleccionado = document.getElementById('admin-select-desbloquear').value;
                     if (confirm(`¿Desbloquear las predicciones de ${familiarSeleccionado}? Podrá modificarlas nuevamente.`)) {
                         desbloquearFamiliar(familiarSeleccionado);
+                        // ========== AGREGAR ESTAS 7 LÍNEAS ==========
+                        fetch(GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                accion: 'registrarDesbloqueo',
+                                participante: familiarSeleccionado
+                            })
+                        });
+                        // ============================================
                     }
                 });
             }
@@ -928,36 +938,54 @@
             alert('✅ Resultados guardados correctamente');
         }
 
-        function cargarPrediccionesEnFormulario(participante) {
+        async function cargarPrediccionesEnFormulario(participante) {
+            // ===== NUEVO: Verificar con Google si el admin hizo cambios =====
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        accion: 'verificarEstado',
+                        participante: participante
+                    })
+                });
+        
+                const data = await response.json();
+        
+                // Si el admin borró las predicciones
+                if (data.prediccionesBorradas) {
+                    delete predicciones[participante];
+                    delete marcadores[participante];
+                    localStorage.setItem('quiniela_predicciones', JSON.stringify(predicciones));
+                    localStorage.setItem('quiniela_marcadores', JSON.stringify(marcadores));
+                    alert(`⚠️ El administrador ha restablecido tus predicciones. Recarga la página para actualizar.`);
+                }
+        
+                // Si el admin desbloqueó las predicciones
+                if (data.desbloqueado) {
+                    delete prediccionesBloqueadas[participante];
+                    localStorage.setItem('quiniela_bloqueadas', JSON.stringify(prediccionesBloqueadas));
+                    alert(`🔓 El administrador ha desbloqueado tus predicciones. Ahora puedes modificarlas.`);
+                }
+            } catch (error) {
+                console.log("No se pudo sincronizar con Google, usando datos locales");
+            }
+            // ================================================================
+    
+            // Código original (sigue igual)
             const preds = predicciones[participante] || {};
             const marks = marcadores[participante] || {};
-    
+
             document.querySelectorAll('select[data-partido-id]').forEach(select => {
                 const partidoId = select.getAttribute('data-partido-id');
                 select.value = preds[partidoId] || '';
             });
-    
+
             document.querySelectorAll('input[type="number"]').forEach(input => {
                 const partidoId = input.getAttribute('data-partido-id');
                 input.value = marks[partidoId]?.[input.id.includes('goles1') ? 'goles1' : 'goles2'] || '';
             });
-
-            // NUEVO: Verificar bloqueo
-            if (prediccionesBloqueadas[participante]) {
-                bloquearCamposDelFamiliar(participante);
-            } else {
-                // Asegurar que los campos estén habilitados
-                document.querySelectorAll('select[data-partido-id]').forEach(select => {
-                    select.disabled = false;
-                });
-                document.querySelectorAll('input[type="number"]').forEach(input => {
-                    input.disabled = false;
-                });
-                const mensajeBloqueo = document.getElementById('mensaje-bloqueo');
-                if (mensajeBloqueo) mensajeBloqueo.remove();
-            }
         }
-
         function guardarPrediccionesDesdeFormulario() {
             const participanteActual = document.getElementById('selector-familiar').value;
     

@@ -939,52 +939,49 @@
         }
 
         async function cargarPrediccionesEnFormulario(participante) {
-            // ===== NUEVO: Verificar con Google si el admin hizo cambios =====
+            // Limpiar campos primero
+            document.querySelectorAll('select[data-partido-id]').forEach(select => {
+                select.value = '';
+            });
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.value = '';
+            });
+    
+            // Preguntar a Google si tiene predicciones guardadas
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        accion: 'verificarEstado',
+                        accion: 'obtenerPrediccionesDeUsuario',
                         participante: participante
                     })
                 });
         
                 const data = await response.json();
         
-                // Si el admin borró las predicciones
-                if (data.prediccionesBorradas) {
-                    delete predicciones[participante];
-                    delete marcadores[participante];
-                    localStorage.setItem('quiniela_predicciones', JSON.stringify(predicciones));
-                    localStorage.setItem('quiniela_marcadores', JSON.stringify(marcadores));
-                    alert(`⚠️ El administrador ha restablecido tus predicciones. Recarga la página para actualizar.`);
-                }
-        
-                // Si el admin desbloqueó las predicciones
-                if (data.desbloqueado) {
-                    delete prediccionesBloqueadas[participante];
-                    localStorage.setItem('quiniela_bloqueadas', JSON.stringify(prediccionesBloqueadas));
-                    alert(`🔓 El administrador ha desbloqueado tus predicciones. Ahora puedes modificarlas.`);
+                if (data.predicciones && Object.keys(data.predicciones).length > 0) {
+                    // Tiene predicciones guardadas en Google
+                    for (const [partidoId, ganador] of Object.entries(data.predicciones)) {
+                        const select = document.getElementById(`sel-${partidoId}`);
+                        if (select) select.value = ganador;
+                
+                        const marcador = data.marcadores[partidoId];
+                        if (marcador) {
+                            const input1 = document.getElementById(`goles1-${partidoId}`);
+                            const input2 = document.getElementById(`goles2-${partidoId}`);
+                            if (input1) input1.value = marcador.goles1;
+                            if (input2) input2.value = marcador.goles2;
+                        }
+                    }
+                    alert(`📋 Predicciones de ${participante} cargadas desde la nube.`);
+                } else {
+                    alert(`🆕 ${participante} no tiene predicciones guardadas aún. Puedes hacer tus predicciones.`);
                 }
             } catch (error) {
-                console.log("No se pudo sincronizar con Google, usando datos locales");
+                console.error("Error cargando desde Google:", error);
+                alert("⚠️ No se pudo conectar con la nube. Revisa tu conexión a internet.");
             }
-            // ================================================================
-    
-            // Código original (sigue igual)
-            const preds = predicciones[participante] || {};
-            const marks = marcadores[participante] || {};
-
-            document.querySelectorAll('select[data-partido-id]').forEach(select => {
-                const partidoId = select.getAttribute('data-partido-id');
-                select.value = preds[partidoId] || '';
-            });
-
-            document.querySelectorAll('input[type="number"]').forEach(input => {
-                const partidoId = input.getAttribute('data-partido-id');
-                input.value = marks[partidoId]?.[input.id.includes('goles1') ? 'goles1' : 'goles2'] || '';
-            });
         }
         function guardarPrediccionesDesdeFormulario() {
             const participanteActual = document.getElementById('selector-familiar').value;
